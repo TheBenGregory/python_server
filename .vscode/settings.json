@@ -2,5 +2,14 @@
     "cSpell.words": [
         "rfile",
         "wfile"
-    ]
+    ],
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "Python Kennels",
+            "database": "kennel.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
 }
