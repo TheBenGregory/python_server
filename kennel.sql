@@ -64,4 +64,4 @@ SELECT
     a.location_id,
     a.customer_id
 FROM animal a
-WHERE a.id = ?
+WHERE a.id = 3

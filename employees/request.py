@@ -1,94 +1,50 @@
-EMPLOYEES = [
-    {
-      "id": 1,
-      "name": "Jessica Younker",
-      "email": "jessica@younker.com",
-      
-    },
-    {
-      "id": 2,
-      "name": "Jordan Nelson",
-      "email": "jordan@nelson.com",
-      
-    },
-    {
-      "id": 3,
-      "name": "Zoe LeBlanc",
-      "email": "zoe@leblanc.com",
-      
-    },
-    {
-      "name": "Meg Ducharme",
-      "email": "meg@ducharme.com",
-      "id": 4,
-      
-    },
-    {
-      "name": "Hannah Hall",
-      "email": "hannah@hall.com",
-      "id": 5,
-      
-    },
-    {
-      "name": "Emily Lemmon",
-      "email": "emily@lemmon.com",
-      "id": 6,
-      
-    },
-    {
-      "name": "Jordan Castelloe",
-      "email": "jordan@castelloe.com",
-      "id": 7,
-      
-    },
-    {
-      "name": "Leah Gwin",
-      "email": "leah@gwin.com",
-      "id": 8,
-      
-    },
-    {
-      "name": "Caitlin Stein",
-      "email": "caitlin@stein.com",
-      "id": 9,
-      
-    },
-    {
-      "name": "Greg Korte",
-      "email": "greg@korte.com",
-      "id": 10,
-      
-    },
-    {
-      "name": "Charisse Lambert",
-      "email": "charisse@lambert.com",
-      "id": 11,
-      
-    },
-    {
-      "name": "Madi Peper",
-      "email": "madi@peper.com",
-      "id": 12,
-      
-    },
-    {
-      "name": "Jenna Solis",
-      "email": "jenna@solis.com",
-      "id": 14,
-      
-    },
-]
-
+import sqlite3
+import json
+from models import Employee
 
 def get_all_employees():
-    return EMPLOYEES
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.address
+            a.location_id
+        FROM employee a
+        """)
+        employees = []
+        dataset = db_cursor.fetchall()
+        for row in dataset:
+            employee = Employee(row['id'], row['name'], row['address'], row['location_id'],)
+            employees.append(employee.__dict__)
+    return json.dumps(employees)
+
+
 
 def get_single_employee(id):
-    requested_employee = None
-    for employee in EMPLOYEES:
-        if employee["id"] == id:
-            requested_employee = employee
-    return requested_employee
+    with sqlite3.connect("./kennel.db") as conn:
+        conn.row_factory = sqlite3.Row
+        db_cursor = conn.cursor()
+        db_cursor.execute("""
+        SELECT
+            a.id,
+            a.name,
+            a.address
+            a.location_id
+        FROM employee a
+        WHERE a.id = ?
+        """, ( id, ))
+
+        data = db_cursor.fetchone()
+
+       
+        employee = Employee(data['id'], data['name'], data['address'],
+                            data['location_id'],
+                            )
+
+        return json.dumps(employee.__dict__)
 
 def create_employee(employee):
     max_id = EMPLOYEES[-1]["id"]
