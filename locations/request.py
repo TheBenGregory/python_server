@@ -10,7 +10,7 @@ def get_all_locations():
         SELECT
             a.id,
             a.name,
-            a.address,
+            a.address
         FROM location a
         """)
         locations = []
@@ -32,7 +32,7 @@ def get_single_location(id):
         SELECT
             a.id,
             a.name,
-            a.address,
+            a.address
         FROM location a
         WHERE a.id = ?
         """, ( id, ))
@@ -53,15 +53,36 @@ def create_location(location):
     return location
 
 def delete_location(id):
-    location_index = -1
-    for index, location in enumerate(LOCATIONS):
-        if location["id"] == id:           
-            location_index = index
-    if location_index >= 0:
-        LOCATIONS.pop(location_index)
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM location
+        WHERE id = ?
+        """, (id, ))
+
+
 
 def update_location(id, new_location):
-    for index, location in enumerate(LOCATIONS):
-        if location["id"] == id:
-            LOCATIONS[index] = new_location
-            break
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Location
+            SET
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                location_id = ?
+        WHERE id = ?
+        """, (new_location['name'], new_location['breed'],
+              new_location['status'], new_location['location_id'],
+              new_location['location_id'], id, ))
+
+        rows_affected = db_cursor.rowcount
+
+    if rows_affected == 0:
+        return False
+    else:
+        return True

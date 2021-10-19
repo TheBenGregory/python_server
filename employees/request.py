@@ -10,7 +10,7 @@ def get_all_employees():
         SELECT
             a.id,
             a.name,
-            a.address
+            a.address,
             a.location_id
         FROM employee a
         """)
@@ -31,7 +31,7 @@ def get_single_employee(id):
         SELECT
             a.id,
             a.name,
-            a.address
+            a.address,
             a.location_id
         FROM employee a
         WHERE a.id = ?
@@ -54,15 +54,36 @@ def create_employee(employee):
     return employee
 
 def delete_employee(id):
-    employee_index = -1
-    for index, employee in enumerate(EMPLOYEES):
-        if employee["id"] == id:           
-            employee_index = index
-    if employee_index >= 0:
-        EMPLOYEES.pop(employee_index)
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM employee
+        WHERE id = ?
+        """, (id, ))
+
+
 
 def update_employee(id, new_employee):
-    for index, employee in enumerate(EMPLOYEES):
-        if employee["id"] == id:
-            EMPLOYEES[index] = new_employee
-            break
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Employee
+            SET
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                employee_id = ?
+        WHERE id = ?
+        """, (new_employee['name'], new_employee['breed'],
+              new_employee['status'], new_employee['location_id'],
+              new_employee['employee_id'], id, ))
+
+        rows_affected = db_cursor.rowcount
+
+    if rows_affected == 0:
+        return False
+    else:
+        return True

@@ -7,7 +7,7 @@
         {
             "previewLimit": 50,
             "driver": "SQLite",
-            "name": "Python Kennels",
+            "name": "KENNEL DB",
             "database": "kennel.db"
         }
     ],

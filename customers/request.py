@@ -11,9 +11,9 @@ def get_all_customers():
         SELECT
             a.id,
             a.name,
-            a.address
+            a.address,
             a.email,
-            a.password,
+            a.password
         FROM customer a
         """)
         customers = []
@@ -36,8 +36,7 @@ def get_single_customer(id):
             a.name,
             a.address,
             a.email,
-            a.password,
-            
+            a.password
         FROM customer a
         WHERE a.id = ?
         """, ( id, ))
@@ -59,18 +58,40 @@ def create_customer(customer):
     return customer
 
 def delete_customer(id):
-    customer_index = -1
-    for index, customer in enumerate(CUSTOMERS):
-        if customer["id"] == id:           
-            customer_index = index
-    if customer_index >= 0:
-        CUSTOMERS.pop(customer_index)
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        DELETE FROM customer
+        WHERE id = ?
+        """, (id, ))
+
+
 
 def update_customer(id, new_customer):
-    for index, customer in enumerate(CUSTOMERS):
-        if customer["id"] == id:
-            CUSTOMERS[index] = new_customer
-            break
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
+
+        db_cursor.execute("""
+        UPDATE Customer
+            SET
+                name = ?,
+                breed = ?,
+                status = ?,
+                location_id = ?,
+                customer_id = ?
+        WHERE id = ?
+        """, (new_customer['name'], new_customer['breed'],
+              new_customer['status'], new_customer['location_id'],
+              new_customer['customer_id'], id, ))
+
+        rows_affected = db_cursor.rowcount
+
+    if rows_affected == 0:
+        return False
+    else:
+        return True
+
 
 def get_customers_by_email(email):
 
