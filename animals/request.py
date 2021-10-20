@@ -1,6 +1,8 @@
 import sqlite3
 import json
 from models import Animal
+from models import Location
+from models import Customer
 
 
 def get_all_animals():
@@ -15,16 +17,23 @@ def get_all_animals():
             a.breed,
             a.status,
             a.location_id,
-            a.customer_id
-        FROM animal a
+            a.customer_id,
+            l.name location_name,
+            l.address location_address
+        FROM Animal a
+        JOIN Location l
+            ON l.id = a.location_id
+        JOIN Customer c
+            ON c.id = l.location_id
         """)
         animals = []
         dataset = db_cursor.fetchall()
         for row in dataset:
-            animal = Animal(row['id'], row['name'], row['breed'],
-                            row['status'], row['location_id'],
-                            row['customer_id'])
-
+            animal = Animal(row['id'], row['name'], row['breed'], row['status'],
+                            row['location_id'], row['customer_id'])
+            location = Location(row['location_id'], row['location_name'], row['location_address'])
+            customer = Customer(row['customer_id']), row['customer_name'], row['customer_address'], row['customer_email'], row['customer_password']
+            animal.location = location.__dict__
             animals.append(animal.__dict__)
     return json.dumps(animals)
 
@@ -56,21 +65,24 @@ def get_single_animal(id):
         return json.dumps(animal.__dict__)
 
 
-def create_animal(animal):
-    # Get the id value of the last animal in the list
-    max_id = ANIMALS[-1]["id"]
+def create_animal(new_animal):
+    with sqlite3.connect("./kennel.db") as conn:
+        db_cursor = conn.cursor()
 
-    # Add 1 to whatever that number is
-    new_id = max_id + 1
+        db_cursor.execute("""
+        INSERT INTO Animal
+            ( name, status, breed, customer_id, location_id )
+        VALUES
+            ( ?, ?, ?, ?, ?);
+        """, (new_animal['name'], new_animal['status'],
+              new_animal['breed'], new_animal['customer_id'],
+              new_animal['location_id'], ))
+        id = db_cursor.lastrowid
+        new_animal['id'] = id
 
-    # Add an `id` property to the animal dictionary
-    animal["id"] = new_id
 
-    # Add the animal dictionary to the list
-    ANIMALS.append(animal)
+    return json.dumps(new_animal)
 
-    # Return the dictionary with `id` property added
-    return animal
 
 def delete_animal(id):
     with sqlite3.connect("./kennel.db") as conn:

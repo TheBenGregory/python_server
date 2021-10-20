@@ -124,11 +124,9 @@ class HandleRequests(BaseHTTPRequestHandler):
 
 
 
-    # This weird code sends a response back to the client
-        self.wfile.write(f"{response}".encode())
+   
 
-    # Here's a method on the class that overrides the parent's method.
-    # It handles any POST request.
+
     def do_POST(self):
         self._set_headers(201)
         content_len = int(self.headers.get('content-length', 0))
